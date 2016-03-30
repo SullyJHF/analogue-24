@@ -1,14 +1,14 @@
 {
   "uuid": "1091d04d-b757-438b-8ffb-687d08e4c449",
   "shortName": "analogue-24",
-  "longName": "analogue-24",
-  "companyName": "MakeAwesomeHappen",
+  "longName": "24 hour analogue clock",
+  "companyName": "SullyJHF",
   "versionLabel": "1.0",
   "sdkVersion": "3",
   "targetPlatforms": ["aplite", "basalt", "chalk"],
   "enableMultiJS": true,
   "watchapp": {
-    "watchface": false
+    "watchface": true
   },
   "appKeys": {
     "dummy": 0
