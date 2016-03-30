@@ -1,0 +1,19 @@
+{
+  "uuid": "1091d04d-b757-438b-8ffb-687d08e4c449",
+  "shortName": "analogue-24",
+  "longName": "analogue-24",
+  "companyName": "MakeAwesomeHappen",
+  "versionLabel": "1.0",
+  "sdkVersion": "3",
+  "targetPlatforms": ["aplite", "basalt", "chalk"],
+  "enableMultiJS": true,
+  "watchapp": {
+    "watchface": false
+  },
+  "appKeys": {
+    "dummy": 0
+  },
+  "resources": {
+    "media": []
+  }
+}
