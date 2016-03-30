@@ -35,8 +35,10 @@ static GPoint set_end(int32_t angle, int length) {
   return result;
 }
 
-/****** tick handler ******/
-static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
+static void update_hands() {
+  time_t temp = time(NULL);
+  struct tm *tick_time = localtime(&temp);
+
   int hour = tick_time->tm_hour;
   int minute = tick_time->tm_min;
 
@@ -45,7 +47,11 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
 
   minute_end = set_end(minute_frac, MINUTE_LENGTH);
   hour_end = set_end(hour_frac, HOUR_LENGTH);
+}
 
+/****** tick handler ******/
+static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
+  update_hands();
   layer_mark_dirty(main_clock_layer);
 }
 
@@ -65,6 +71,7 @@ static void window_load(Window *window) {
 
   layer_set_update_proc(main_clock_layer, canvas_update_proc);
   layer_add_child(window_layer, main_clock_layer);
+  update_hands();
 }
 
 static void window_unload(Window *window) {
