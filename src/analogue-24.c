@@ -9,7 +9,7 @@ static Layer *main_clock_layer;
 static GPoint centre;
 
 static GPoint minute_end;
-#define MINUTE_LENGTH 65
+#define MINUTE_LENGTH 60
 
 static GPoint hour_end;
 #define HOUR_LENGTH 45
@@ -18,13 +18,14 @@ static GPoint lower_dot;
 
 /****** drawing stuff ******/
 static void canvas_update_proc(Layer *layer, GContext *ctx) {
-  graphics_context_set_stroke_width(ctx, 9);
+  graphics_context_set_stroke_width(ctx, 11);
+
   graphics_context_set_stroke_color(ctx, GColorWhite);
+  graphics_draw_line(ctx, centre, minute_end);
   graphics_draw_line(ctx, lower_dot, lower_dot);
 
-  graphics_draw_line(ctx, centre, minute_end);
 
-  graphics_context_set_stroke_color(ctx, GColorRed);
+  graphics_context_set_stroke_color(ctx, GColorCyan);
   graphics_draw_line(ctx, centre, hour_end);
 }
 
@@ -59,7 +60,6 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
 static void window_load(Window *window) {
   centre = GPoint(WIDTH / 2, HEIGHT / 2);
   lower_dot = GPoint(WIDTH / 2, 158);
-
 
   minute_end = centre;
   hour_end = centre;
