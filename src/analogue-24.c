@@ -43,8 +43,8 @@ static void update_hands() {
   int hour = tick_time->tm_hour;
   int minute = tick_time->tm_min;
 
-  int32_t minute_frac = TRIG_MAX_ANGLE * minute / 60;
-  int32_t hour_frac = TRIG_MAX_ANGLE * hour / 24;
+  int32_t minute_frac = TRIG_MAX_ANGLE * minute / 60.0;
+  int32_t hour_frac = TRIG_MAX_ANGLE * (hour + minute / 60.0) / 24.0;
 
   minute_end = set_end(minute_frac, MINUTE_LENGTH);
   hour_end = set_end(hour_frac, HOUR_LENGTH);
