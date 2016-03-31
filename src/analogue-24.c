@@ -16,6 +16,23 @@ static GPoint hour_end;
 
 static GPoint lower_dot;
 
+// angle from positive x axis from sun is just heliocentric longitudinal angle
+// work that shit out for each planet
+
+// to work out for the moon, use geocentric longitudinal angle and draw it from Earth
+
+// ez
+
+struct Planet {
+  int position; // number 0 - 8, which planet from closest to sun to furthest
+  float n; // daily motion of planet in degrees / day
+  float L; // longitude at epoch
+  float a;
+};
+
+struct Planet mercury;
+struct Planet earth;
+
 /****** drawing stuff ******/
 static void canvas_update_proc(Layer *layer, GContext *ctx) {
   graphics_context_set_stroke_width(ctx, 11);
@@ -40,14 +57,31 @@ static void update_hands() {
   time_t temp = time(NULL);
   struct tm *tick_time = localtime(&temp);
 
+  int year = tick_time->tm_year + 1900;
+  int month = tick_time->tm_mon + 1;
+  int day = tick_time->tm_mday;
   int hour = tick_time->tm_hour;
   int minute = tick_time->tm_min;
+
+  // int d = 367*year - (7*(year + ((month+9)/12)))/4 +(275*month)/9 + day - 730530; // day number from 2000 or something
+  float epoch_JD = 2450320.5;
+  int a = (14 - month) / 12;
+  int y = year + 4800 - a;
+  int m = month + 12 * a - 3;
+
+  int current_JD = day + (153 * m + 2) / 5 + 365 * y + y / 4 - y / 100 + y / 400 - 32045;
+
+  int d = current_JD - epoch_JD;
+
+  int32_t hle = (int)(earth.n * d + earth.L) % 360; // sick this works, gives heliocentric longitude of earth
 
   int32_t minute_frac = TRIG_MAX_ANGLE * minute / 60.0;
   int32_t hour_frac = TRIG_MAX_ANGLE * (hour + minute / 60.0) / 24.0;
 
   minute_end = set_end(minute_frac, MINUTE_LENGTH);
   hour_end = set_end(hour_frac, HOUR_LENGTH);
+
+  // APP_LOG(APP_LOG_LEVEL_DEBUG, "%d, %lu", d, hle);
 }
 
 /****** tick handler ******/
@@ -58,6 +92,14 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
 
 /****** window life ******/
 static void window_load(Window *window) {
+  mercury.n = 4.092385;
+  mercury.L = 281.18017;
+  mercury.a = 0.3870975;
+
+  earth.n = 0.9855931;
+  earth.L = 333.58600;
+  earth.a = 1.0000108;
+
   centre = GPoint(WIDTH / 2, HEIGHT / 2);
   lower_dot = GPoint(WIDTH / 2, 158);
 
