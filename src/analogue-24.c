@@ -24,14 +24,27 @@ static GPoint lower_dot;
 // ez
 
 struct Planet {
-  int position; // number 0 - 8, which planet from closest to sun to furthest
+  int id; // id of planet
   float n; // daily motion of planet in degrees / day
   float L; // longitude at epoch
-  float a;
+  int orbits; // what planet this one orbits (for moons) this will mostly be the sun's id
+  int s; // size (radius of the planet in pixels)
+  int r; // distance from orbits to this planet (pixels)
+  int l; // current day's orbits-centric longitude (mostly heliocentric, moon will be geocentric)
 };
 
+struct Planet sun; // I know the sun isn't a planet, I may rename the struct
+
 struct Planet mercury;
+struct Planet venus;
 struct Planet earth;
+struct Planet mars;
+struct Planet jupiter;
+struct Planet saturn;
+struct Planet uranus;
+struct Planet neptune;
+
+struct Planet moon; // also the moon's not a planet
 
 /****** drawing stuff ******/
 static void canvas_update_proc(Layer *layer, GContext *ctx) {
@@ -63,15 +76,15 @@ static void update_hands() {
   int hour = tick_time->tm_hour;
   int minute = tick_time->tm_min;
 
-  // int d = 367*year - (7*(year + ((month+9)/12)))/4 +(275*month)/9 + day - 730530; // day number from 2000 or something
-  float epoch_JD = 2450320.5;
+  float epoch_JD = 2450320.5; // 0h UT 25th august 1996
+
   int a = (14 - month) / 12;
   int y = year + 4800 - a;
   int m = month + 12 * a - 3;
 
   int current_JD = day + (153 * m + 2) / 5 + 365 * y + y / 4 - y / 100 + y / 400 - 32045;
 
-  int d = current_JD - epoch_JD;
+  int d = current_JD - epoch_JD; // days since 0h UT 25th august 1996
 
   int32_t hle = (int)(earth.n * d + earth.L) % 360; // sick this works, gives heliocentric longitude of earth
 
@@ -94,11 +107,9 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
 static void window_load(Window *window) {
   mercury.n = 4.092385;
   mercury.L = 281.18017;
-  mercury.a = 0.3870975;
 
   earth.n = 0.9855931;
   earth.L = 333.58600;
-  earth.a = 1.0000108;
 
   centre = GPoint(WIDTH / 2, HEIGHT / 2);
   lower_dot = GPoint(WIDTH / 2, 158);
