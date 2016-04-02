@@ -1,0 +1,15 @@
+ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+---------   --- ---  --- -   ---   ---------    -------   -----   -----
+0           1   2    3   9   4     5            6         7       8
+
+id  planet    size  distance (from orbit)
+0   sun:      19    0
+1   mercury:  3     14
+2   venus:    3     18
+3   earth:    3     23
+4   mars:     3     31
+5   jupiter:  9     40
+6   saturn:   7     52
+7   uranus:   5     61
+8   neptune:  5     69
+9   moon:     1     3
