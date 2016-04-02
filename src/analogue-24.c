@@ -2,6 +2,7 @@
 
 #define WIDTH  144
 #define HEIGHT 168
+#define NUM_OF_PLANETS 10
 
 static Window *window;
 static Layer *main_clock_layer;
@@ -40,6 +41,8 @@ struct Planet neptune;
 
 struct Planet moon; // also the moon's not a planet
 
+struct Planet planet_array[NUM_OF_PLANETS];
+
 /****** drawing stuff ******/
 static void draw_planet(struct Planet p, GContext *ctx) {
   graphics_context_set_stroke_color(ctx, p.colour);
@@ -58,15 +61,9 @@ static void canvas_update_proc(Layer *layer, GContext *ctx) {
   graphics_context_set_stroke_color(ctx, GColorFromRGB(0, 100, 100));
   graphics_draw_line(ctx, centre, hour_end);
 
-  draw_planet(sun, ctx);
-  draw_planet(mercury, ctx);
-  draw_planet(venus, ctx);
-  draw_planet(earth, ctx);
-  draw_planet(mars, ctx);
-  draw_planet(jupiter, ctx);
-  draw_planet(saturn, ctx);
-  draw_planet(uranus, ctx);
-  draw_planet(neptune, ctx);
+  for(int i = 0; i < NUM_OF_PLANETS; i++){
+    draw_planet(planet_array[i], ctx);
+  }
 }
 
 static GPoint set_end(int32_t angle, int length) {
@@ -78,8 +75,13 @@ static GPoint set_end(int32_t angle, int length) {
 
 static struct Planet get_planet_position(struct Planet p, int d) {
   p.l = TRIG_MAX_ANGLE * ((((int)(p.n * d + p.L) % 360)) / 360.0);
-  p.x = (sin_lookup(-p.l) * p.d / TRIG_MAX_RATIO) + centre.x;
-  p.y = (-cos_lookup(-p.l) * p.d / TRIG_MAX_RATIO) + centre.y;
+
+  if(p.o) {
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "%d doesn't orbit the sun!", p.id);
+  } else {
+    p.x = (sin_lookup(-p.l) * p.d / TRIG_MAX_RATIO) + centre.x;
+    p.y = (-cos_lookup(-p.l) * p.d / TRIG_MAX_RATIO) + centre.y;
+  }
   return p;
 }
 
@@ -100,15 +102,9 @@ static void calculate_planets() {
 
   int d = current_JD - epoch_JD; // days since 0h UT 25th august 1996
 
-  sun = get_planet_position(sun, d);
-  mercury = get_planet_position(mercury, d);
-  venus = get_planet_position(venus, d);
-  earth = get_planet_position(earth, d);
-  mars = get_planet_position(mars, d);
-  jupiter = get_planet_position(jupiter, d);
-  saturn = get_planet_position(saturn, d);
-  uranus = get_planet_position(uranus, d);
-  neptune = get_planet_position(neptune, d);
+  for(int i = 0; i < NUM_OF_PLANETS; i++){
+    planet_array[i] = get_planet_position(planet_array[i], d);
+  }
 }
 
 static void update_hands() {
@@ -144,6 +140,7 @@ static void window_load(Window *window) {
   sun.L = 0;
   sun.s = 19;
   sun.colour = GColorYellow;
+  planet_array[sun.id] = sun;
 
   mercury.id = 1;
   mercury.n = 4.092385F;
@@ -151,6 +148,7 @@ static void window_load(Window *window) {
   mercury.s = 3;
   mercury.d = 14;
   mercury.colour = GColorFromRGB(153, 51, 0);
+  planet_array[mercury.id] = mercury;
 
   venus.id = 2;
   venus.n = 1.602159F;
@@ -158,6 +156,7 @@ static void window_load(Window *window) {
   venus.s = 3;
   venus.d = 18;
   venus.colour = GColorFromRGB(153, 153, 153);
+  planet_array[venus.id] = venus;
 
   earth.id = 3;
   earth.n = 0.9855931F;
@@ -165,6 +164,7 @@ static void window_load(Window *window) {
   earth.s = 3;
   earth.d = 23;
   earth.colour = GColorGreen;
+  planet_array[earth.id] = earth;
 
   mars.id = 4;
   mars.n = 0.5240218F;
@@ -172,6 +172,7 @@ static void window_load(Window *window) {
   mars.s = 3;
   mars.d = 31;
   mars.colour = GColorRed;
+  planet_array[mars.id] = mars;
 
   jupiter.id = 5;
   jupiter.n = 0.08310024F;
@@ -179,6 +180,7 @@ static void window_load(Window *window) {
   jupiter.s = 9;
   jupiter.d = 40;
   jupiter.colour = GColorFromRGB(255, 204, 102);
+  planet_array[jupiter.id] = jupiter;
 
   saturn.id = 6;
   saturn.n = 0.03333857F;
@@ -186,6 +188,7 @@ static void window_load(Window *window) {
   saturn.s = 7;
   saturn.d = 52;
   saturn.colour = GColorFromRGB(255, 204, 204);
+  planet_array[saturn.id] = saturn;
 
   uranus.id = 7;
   uranus.n = 0.01162075F;
@@ -193,6 +196,7 @@ static void window_load(Window *window) {
   uranus.s = 5;
   uranus.d = 61;
   uranus.colour = GColorFromRGB(102, 204, 255);
+  planet_array[uranus.id] = uranus;
 
   neptune.id = 8;
   neptune.n = 0.005916098F;
@@ -200,6 +204,16 @@ static void window_load(Window *window) {
   neptune.s = 5;
   neptune.d = 69;
   neptune.colour = GColorFromRGB(26, 178, 255);
+  planet_array[neptune.id] = neptune;
+
+  moon.id = 9;
+  moon.n = 360/27.3;
+  moon.L = 297.58472F;
+  moon.s = 1;
+  moon.d = 3;
+  moon.o = 3;
+  moon.colour = GColorFromRGB(153, 153, 153);
+  planet_array[moon.id] = moon;
   /**** end setting planets ****/
 
   centre = GPoint(WIDTH / 2, HEIGHT / 2);
