@@ -74,7 +74,6 @@ static GPoint set_end(int32_t angle, int length) {
 }
 
 static GPoint get_planet_pixel_pos(int id) {
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "%d: x: %d, y: %d", id, planet_array[id].x, planet_array[id].y);
   return GPoint(planet_array[id].x, planet_array[id].y);;
 }
 
@@ -212,15 +211,14 @@ static void window_load(Window *window) {
   planet_array[neptune.id] = neptune;
 
   moon.id = 9;
-  moon.n = 360/27.3;
-  moon.L = 297.58472F;
+  moon.n = 360/27.32;
+  moon.L = 286.914F;
   moon.s = 1;
   moon.d = 4;
   moon.o = 3;
   moon.colour = GColorFromRGB(153, 153, 153);
   planet_array[moon.id] = moon;
   /**** end setting planets ****/
-
 
   minute_end = centre;
   hour_end = centre;
