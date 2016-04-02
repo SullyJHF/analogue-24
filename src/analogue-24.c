@@ -14,23 +14,16 @@ static GPoint minute_end;
 static GPoint hour_end;
 #define HOUR_LENGTH 45
 
-static GPoint lower_dot;
-
-// angle from positive x axis from sun is just heliocentric longitudinal angle
-// work that shit out for each planet
-
-// to work out for the moon, use geocentric longitudinal angle and draw it from Earth
-
-// ez
-
 struct Planet {
   int id; // id of planet
   float n; // daily motion of planet in degrees / day
   float L; // longitude at epoch
-  int orbits; // what planet this one orbits (for moons) this will mostly be the sun's id
+  int o; // what planet this one orbits (for moons) this will mostly be the sun's id
   int s; // size (diameter of the planet in pixels)
   int d; // distance from orbits to this planet (pixels)
   int32_t l; // current day's orbits-centric longitude (mostly heliocentric, moon will be geocentric)
+  int x;  // x position in pixels of this planet
+  int y;  // y position in pixels of this planet
   GColor colour; // planet's colour
 };
 
@@ -49,17 +42,10 @@ struct Planet moon; // also the moon's not a planet
 
 /****** drawing stuff ******/
 static void draw_planet(struct Planet p, GContext *ctx) {
-  if(p.id == 0) {
-    graphics_context_set_stroke_color(ctx, p.colour);
-    graphics_context_set_stroke_width(ctx, p.s);
-    graphics_draw_line(ctx, centre, centre);
-  }
   graphics_context_set_stroke_color(ctx, p.colour);
   graphics_context_set_stroke_width(ctx, p.s);
-  GPoint location;
-  location.y = (-cos_lookup(-p.l) * p.d / TRIG_MAX_RATIO) + centre.y;
-  location.x = (sin_lookup(-p.l) * p.d / TRIG_MAX_RATIO) + centre.x;
-  graphics_draw_line(ctx, location, location);
+  GPoint pos = GPoint(p.x, p.y);
+  graphics_draw_line(ctx, pos, pos);
 }
 
 static void canvas_update_proc(Layer *layer, GContext *ctx) {
@@ -68,7 +54,6 @@ static void canvas_update_proc(Layer *layer, GContext *ctx) {
 
   graphics_context_set_stroke_color(ctx, GColorFromRGB(100, 100, 100));
   graphics_draw_line(ctx, centre, minute_end);
-  // graphics_draw_line(ctx, lower_dot, lower_dot);
 
   graphics_context_set_stroke_color(ctx, GColorFromRGB(0, 100, 100));
   graphics_draw_line(ctx, centre, hour_end);
@@ -91,8 +76,11 @@ static GPoint set_end(int32_t angle, int length) {
   return result;
 }
 
-static int32_t get_planet_longitude(struct Planet p, int d) {
-  return TRIG_MAX_ANGLE * ((((int)(p.n * d + p.L) % 360)) / 360.0);
+static struct Planet get_planet_position(struct Planet p, int d) {
+  p.l = TRIG_MAX_ANGLE * ((((int)(p.n * d + p.L) % 360)) / 360.0);
+  p.x = (sin_lookup(-p.l) * p.d / TRIG_MAX_RATIO) + centre.x;
+  p.y = (-cos_lookup(-p.l) * p.d / TRIG_MAX_RATIO) + centre.y;
+  return p;
 }
 
 static void calculate_planets() {
@@ -112,14 +100,15 @@ static void calculate_planets() {
 
   int d = current_JD - epoch_JD; // days since 0h UT 25th august 1996
 
-  mercury.l = get_planet_longitude(mercury, d);
-  venus.l = get_planet_longitude(venus, d);
-  earth.l = get_planet_longitude(earth, d);
-  mars.l = get_planet_longitude(mars, d);
-  jupiter.l = get_planet_longitude(jupiter, d);
-  saturn.l = get_planet_longitude(saturn, d);
-  uranus.l = get_planet_longitude(uranus, d);
-  neptune.l = get_planet_longitude(neptune, d);
+  sun = get_planet_position(sun, d);
+  mercury = get_planet_position(mercury, d);
+  venus = get_planet_position(venus, d);
+  earth = get_planet_position(earth, d);
+  mars = get_planet_position(mars, d);
+  jupiter = get_planet_position(jupiter, d);
+  saturn = get_planet_position(saturn, d);
+  uranus = get_planet_position(uranus, d);
+  neptune = get_planet_position(neptune, d);
 }
 
 static void update_hands() {
@@ -149,6 +138,7 @@ static void day_tick_handler(struct tm *tick_time, TimeUnits units_changed) {
 
 /****** window life ******/
 static void window_load(Window *window) {
+  /**** set all planet default values ****/
   sun.id = 0;
   sun.n = 0;
   sun.L = 0;
@@ -210,9 +200,9 @@ static void window_load(Window *window) {
   neptune.s = 5;
   neptune.d = 69;
   neptune.colour = GColorFromRGB(26, 178, 255);
+  /**** end setting planets ****/
 
   centre = GPoint(WIDTH / 2, HEIGHT / 2);
-  lower_dot = GPoint(WIDTH / 2, 158);
 
   minute_end = centre;
   hour_end = centre;
