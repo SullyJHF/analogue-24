@@ -73,15 +73,16 @@ static GPoint set_end(int32_t angle, int length) {
   return result;
 }
 
+static GPoint get_planet_pixel_pos(int id) {
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "%d: x: %d, y: %d", id, planet_array[id].x, planet_array[id].y);
+  return GPoint(planet_array[id].x, planet_array[id].y);;
+}
+
 static struct Planet get_planet_position(struct Planet p, int d) {
   p.l = TRIG_MAX_ANGLE * ((((int)(p.n * d + p.L) % 360)) / 360.0);
-
-  if(p.o) {
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "%d doesn't orbit the sun!", p.id);
-  } else {
-    p.x = (sin_lookup(-p.l) * p.d / TRIG_MAX_RATIO) + centre.x;
-    p.y = (-cos_lookup(-p.l) * p.d / TRIG_MAX_RATIO) + centre.y;
-  }
+  GPoint orbit = get_planet_pixel_pos(p.o);
+  p.x = (sin_lookup(-p.l) * p.d / TRIG_MAX_RATIO) + orbit.x;
+  p.y = (-cos_lookup(-p.l) * p.d / TRIG_MAX_RATIO) + orbit.y;
   return p;
 }
 
@@ -134,11 +135,15 @@ static void day_tick_handler(struct tm *tick_time, TimeUnits units_changed) {
 
 /****** window life ******/
 static void window_load(Window *window) {
+  centre = GPoint(WIDTH / 2, HEIGHT / 2);
+
   /**** set all planet default values ****/
   sun.id = 0;
   sun.n = 0;
   sun.L = 0;
   sun.s = 19;
+  sun.x = centre.x;
+  sun.y = centre.y;
   sun.colour = GColorYellow;
   planet_array[sun.id] = sun;
 
@@ -210,13 +215,12 @@ static void window_load(Window *window) {
   moon.n = 360/27.3;
   moon.L = 297.58472F;
   moon.s = 1;
-  moon.d = 3;
+  moon.d = 4;
   moon.o = 3;
   moon.colour = GColorFromRGB(153, 153, 153);
   planet_array[moon.id] = moon;
   /**** end setting planets ****/
 
-  centre = GPoint(WIDTH / 2, HEIGHT / 2);
 
   minute_end = centre;
   hour_end = centre;
